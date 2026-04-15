@@ -1,0 +1,91 @@
+{
+  "title": "Interview Report for Abhishek Negi",
+  "matchScore": 68,
+  "technicalQuestions": [
+    {
+      "question": "Explain the concept of JWT and how you implemented token refresh in FreeSkill.",
+      "intention": "Assess understanding of authentication and token lifecycle.",
+      "answer": "I used JWT for access tokens with a short 15‑minute expiry and a refresh token valid for 3 days stored as httpOnly cookie. On token expiry, the client sends the refresh token to a dedicated endpoint which verifies its validity and issues a new access token. This prevents frequent logins while protecting against token theft."
+    },
+    {
+      "question": "In your crop yield prediction system, how did you handle categorical variables and why did you choose that method?",
+      "intention": "Evaluate data preprocessing and model selection skills.",
+      "answer": "I used one‑hot encoding via pandas’ get_dummies for categorical fields like crop variety and state. This preserves the information without implying ordinal relationships. The encoded features were fed into a Random Forest which is robust to high‑dimensional sparse data and mitigates overfitting."
+    },
+    {
+      "question": "Describe how you designed the RESTful API for FreeSkill’s Q&A module and what REST principles you followed.",
+      "intention": "Test API design knowledge and adherence to standards.",
+      "answer": "Each resource (questions, answers, upvotes) follows a plural noun URI (e.g., /api/questions). I used proper HTTP verbs (GET for retrieval, POST for creation, PATCH for updates). Idempotency was ensured for POST/PUT actions. I added pagination via query params and used 201 status for successful creation."
+    }
+  ],
+  "behavioralQuestions": [
+    {
+      "question": "Tell me about a time you took ownership of a project and how you ensured its success.",
+      "intention": "Assess Leadership Principles - Ownership.",
+      "answer": "During FreeSkill, I noticed our caching layer was under‑utilized. I proposed MongoDB cache for bulk imports, designed the schema, and led implementation. This reduced API calls by 60% and earned positive feedback from stakeholders."
+    },
+    {
+      "question": "Give an example of how you demonstrated Bias for Action in your attendance tracker project.",
+      "intention": "Assess Leadership Principles - Bias for Action.",
+      "answer": "When the attendance calculation lagged due to large datasets, I quickly rewrote the aggregation logic using memoization and batch processing, cutting rendering time from 2.5s to 0.4s. I deployed the change within 3 hours, improving user experience."
+    },
+    {
+      "question": "How do you keep yourself curious and continuously learn new technologies?",
+      "intention": "Assess Leadership Principles - Learn and Be Curious.",
+      "answer": "I allocate 2 hours weekly to online courses (NPTEL, Coursera), experiment with new libraries on side projects, and contribute to open source. For instance, I just started exploring PyTorch after building models in TensorFlow."
+    }
+  ],
+  "skillGaps": [
+    { "skill": "Algorithms & Data Structures", "severity": "high" },
+    { "skill": "Operating Systems Concepts", "severity": "medium" },
+    { "skill": "Computer Networking Fundamentals", "severity": "medium" },
+    { "skill": "Advanced Database Design", "severity": "medium" }
+  ],
+  "preparationPlan": [
+    {
+      "day": 1,
+      "focus": "Algorithms & Data Structures",
+      "tasks": [
+        "Review Big O notation, array & string problems",
+        "Practice two‑pointer and sliding window on LeetCode",
+        "Solve 5 medium DS problems"
+      ]
+    },
+    {
+      "day": 2,
+      "focus": "Operating Systems",
+      "tasks": [
+        "Read OS fundamentals (processes, threads, memory mgmt)",
+        "Implement a simple thread pool in Java",
+        "Watch OS lecture videos"
+      ]
+    },
+    {
+      "day": 3,
+      "focus": "Networking",
+      "tasks": [
+        "Study OSI model and TCP/IP stack",
+        "Set up a local HTTP server, trace packets with Wireshark",
+        "Implement a basic TCP client in Python"
+      ]
+    },
+    {
+      "day": 4,
+      "focus": "Advanced Database Design",
+      "tasks": [
+        "Read normalization concepts",
+        "Design ER diagram for a multi‑tenant application",
+        "Implement schema in MongoDB and SQL"
+      ]
+    },
+    {
+      "day": 5,
+      "focus": "Mock Interviews",
+      "tasks": [
+        "Conduct 3 mock coding interviews focusing on DS&A",
+        "Review behavioral answers, refine STAR stories",
+        "Analyze feedback and iterate"
+      ]
+    }
+  ]
+}

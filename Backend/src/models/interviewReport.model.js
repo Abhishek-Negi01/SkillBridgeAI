@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const userModel = require("./user.model");
 
 /**
  * - job description schema : String
@@ -92,7 +93,7 @@ const skillGapSchema = new mongoose.Schema(
   },
 );
 
-const preprationPlanSchema = new mongoose.Schema({
+const preparationPlanSchema = new mongoose.Schema({
   day: {
     type: Number,
     required: [true, "Day is required"],
@@ -129,7 +130,15 @@ const interviewReportSchema = new mongoose.Schema(
     technicalQuestions: [technicalQuestionSchema],
     behavioralQuestions: [behavioralQuestionSchema],
     skillGaps: [skillGapSchema],
-    preprationPlan: [preprationPlanSchema],
+    preparationPlan: [preparationPlanSchema],
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+    },
+    title: {
+      type: String,
+      required: [true, "Job title is required"],
+    },
   },
   {
     timestamps: true,
