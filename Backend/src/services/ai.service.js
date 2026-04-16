@@ -1,97 +1,11 @@
-const { GoogleGenAI } = require("@google/genai");
-const { GEMINI_API_KEY, GROQ_API_KEY } = require("../utils/dotenv.js");
+const { GROQ_API_KEY } = require("../utils/dotenv.js");
 const { z } = require("zod");
-const { zodToJsonSchema } = require("zod-to-json-schema");
 
 const Groq = require("groq-sdk");
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
-const interviewReportSchema = z.object({
-  matchScore: z
-    .number()
-    .describe(
-      "A score between 0 and 100 indicating how well the candidate's profile matches the job describe",
-    ),
-  technicalQuestions: z
-    .array(
-      z.object({
-        question: z
-          .string()
-          .describe("The technical question can be asked in the interview"),
-        intention: z
-          .string()
-          .describe("The intention of interviewer behind asking this question"),
-        answer: z
-          .string()
-          .describe(
-            "How to answer this question, what points to cover, what approach to take etc.",
-          ),
-      }),
-    )
-    .describe(
-      "Technical questions that can be asked in the interview along with their intention and how to answer them",
-    ),
-  behavioralQuestions: z
-    .array(
-      z.object({
-        question: z
-          .string()
-          .describe("The technical question can be asked in the interview"),
-        intention: z
-          .string()
-          .describe("The intention of interviewer behind asking this question"),
-        answer: z
-          .string()
-          .describe(
-            "How to answer this question, what points to cover, what approach to take etc.",
-          ),
-      }),
-    )
-    .describe(
-      "Behavioral questions that can be asked in the interview along with their intention and how to answer them",
-    ),
-  skillGaps: z
-    .array(
-      z.object({
-        skill: z.string().describe("The skill which the candidate is lacking"),
-        severity: z
-          .enum(["low", "medium", "high"])
-          .describe(
-            "The severity of this skill gap, i.e. how important is this skill for the job and how much it can impact the candidate's chances",
-          ),
-      }),
-    )
-    .describe(
-      "List of skill gaps in the candidate's profile along with their severity",
-    ),
-  preparationPlan: z
-    .array(
-      z.object({
-        day: z
-          .number()
-          .describe("The day number in the preparation plan, starting from 1"),
-        focus: z
-          .string()
-          .describe(
-            "The main focus of this day in the preparation plan, e.g. data structures, system design, mock interviews etc.",
-          ),
-        tasks: z
-          .array(z.string())
-          .describe(
-            "List of tasks to be done on this day to follow the preparation plan, e.g. read a specific book or article, solve a set of problems, watch a video etc.",
-          ),
-      }),
-    )
-    .describe(
-      "A day-wise preparation plan for the candidate to follow in order to prepare for the interview effectively",
-    ),
-  title: z
-    .string()
-    .describe(
-      "The title of the job for which the interview report is generated",
-    ),
-});
+const puppeteer = require("puppeteer");
 
 async function generateInterviewReport({
   resume,
@@ -231,4 +145,102 @@ async function generateInterviewReport({
   return JSON.parse(content);
 }
 
-module.exports = generateInterviewReport;
+async function generatePdfFromHtml(htmlContent) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  await page.setContent(htmlContent, { waitUntil: "networkidle2" });
+
+  const pdfBuffer = await page.pdf({
+    format: "A4",
+    margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
+  });
+
+  await browser.close();
+
+  return pdfBuffer;
+}
+
+async function generateResumePdf({ resume, selfDescription, jobDescription }) {
+  const resumePdfSchema = {
+    type: "object",
+    properties: {
+      html: { type: "string" },
+    },
+    required: ["html"],
+    additionalProperties: false,
+  };
+
+  const prompt = `
+You are an expert resume writer.
+
+Generate a professional ATS-friendly resume in HTML format.
+
+━━━━━━━━━━━
+STRICT RULES
+━━━━━━━━━━━
+
+1. Return ONLY valid JSON
+2. Follow schema EXACTLY
+3. No extra text outside JSON
+
+━━━━━━━━━━━
+HTML RULES
+━━━━━━━━━━━
+
+- Use clean HTML (inline CSS allowed)
+- Use only: div, h1, h2, p, ul, li
+- No tables, no complex layouts
+- Sections required:
+  - Summary
+  - Skills
+  - Experience
+  - Projects
+  - Education
+- Keep itin 1 page
+- ATS friendly
+
+━━━━━━━━━━━
+INPUT
+━━━━━━━━━━━
+
+Resume:
+${resume}
+
+Self Description:
+${selfDescription}
+
+Job Description:
+${jobDescription}
+`;
+
+  const response = await groq.chat.completions.create({
+    model: "openai/gpt-oss-120b",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.3,
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "resume_html",
+        strict: true,
+        schema: resumePdfSchema,
+      },
+    },
+  });
+
+  const content = response?.choices?.[0]?.message?.content || response?.content;
+
+  if (!content) {
+    throw new Error("No content from Groq response");
+  }
+
+  console.log(content);
+
+  const jsonContent = JSON.parse(content);
+
+  const pdfBuffer = await generatePdfFromHtml(jsonContent.html);
+
+  return pdfBuffer;
+}
+
+module.exports = { generateInterviewReport, generateResumePdf };
