@@ -44,3 +44,18 @@ export const getAllInterviewReports = async () => {
 
   return response.data;
 };
+
+/**
+ * @description service to generate resume pdf , expects interviewReportId.
+ */
+export const generateResumePdf = async ({ interviewReportId }) => {
+  const response = await api.post(
+    `/api/interview/resume/pdf/${interviewReportId}`,
+    null,
+    {
+      responseType: "blob",
+    },
+  );
+
+  return response.data;
+};

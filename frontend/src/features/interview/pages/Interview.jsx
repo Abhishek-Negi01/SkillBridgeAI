@@ -5,7 +5,7 @@ import { useParams } from "react-router";
 
 const Interview = () => {
   const [activeSection, setActiveSection] = useState("technical");
-  const { report, getReportById, loading } = useInterview();
+  const { report, getReportById, loading, getResumePdf } = useInterview();
   const { interviewId } = useParams();
 
   const safeReport = {
@@ -255,6 +255,12 @@ const Interview = () => {
                   {safeReport.preparationPlan.length} Days
                 </span>
               </div>
+            </button>
+            <button
+              className="button primary-button"
+              onClick={() => getResumePdf(interviewId)}
+            >
+              generate resume
             </button>
           </nav>
         </aside>
